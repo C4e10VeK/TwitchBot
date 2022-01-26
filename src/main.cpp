@@ -1,94 +1,38 @@
 #include <iostream>
-#include <fstream>
-#include <regex>
-#include <thread>
-
-#include "IRCClinet.hpp"
-
-struct ChatUser
-{
-	std::string rawMessage;
-	std::string nickname;
-	std::string channel;
-	std::string message;
-};
-
-ChatUser getChatUserInfo(const std::string &msg)
-{
-	ChatUser user;
-	std::regex r(":([a-z0-9_]+)!\\1@\\1.tmi.twitch.tv PRIVMSG #([a-z0-9_]+) :(.*)");
-	std::smatch matches;
-
-	if (!std::regex_search(msg, matches, r)) return { "", "", "", "" };
-
-	user.rawMessage = matches[0].str();
-	user.nickname = matches[1].str();
-	user.channel = matches[2].str();
-	user.message = matches[3].str();
-
-	return user;
-}
+#include "BotCore.hpp"
 
 int main()
-{
-	std::string host;
-	std::string port;
-	std::string token;
+{	
+	BotCore bot;
+	bot.init("config.yaml");
 
-	std::ifstream configFile;
-	configFile.open("config.conf");
-	
-	std::getline(configFile, host);
-	std::getline(configFile, port);
-	std::getline(configFile, token);
+	bot.setMessageCallback([](MessageContext &ctx){
+				std::clog << ctx.getNickname() << ": " <<  ctx.getMessage() << std::endl;
 
-	configFile.close();
+				if (ctx.getMessage().compare(0, ctx.getPrefix().size(), ctx.getPrefix()) != 0)
+					return;
 
-	std::string autho = "PASS " + token;
-	std::string nick = "NICK chelovchik";
-	std::string join = "JOIN #chelovchik";
-
-	IRCClient client;
-
-	client.connect(host.c_str(), port.c_str());
-
-	client.send(autho);
-	client.send(nick);
-
-	token.clear();
-	autho.clear();
-
-	auto msg = client.receive();
-
-	std::cout << msg << std::endl;
-
-	client.send(join);
-
-	std::thread autoPong([&]{
-				while (client.isConnected())
+				if (ctx.getNickname() == "a2p1k04")
 				{
-					client.send("PONG :tmi.twitch.tv");
-					std::this_thread::sleep_for(std::chrono::milliseconds(240000));
+					ctx.send("@a2p1k04 У тебя перманентный бан в боте coMMMMfy");
+					return;
 				}
-			});
 
-	while (client.isConnected())
-	{
-		msg = client.receive();
+				std::string line = ctx.getMessage().substr(ctx.getPrefix().size());
+				std::string command = line.substr(0, line.find(" "));
+				std::string arg = line.substr(command.size());
 
-		std::clog << msg << std::endl;	
+				if (command == "киндер" || command == "kinder")
+					ctx.send(ctx.getMention() + ", ты реально подумал что я буду тоже как все киндер делать? VeryPag");
+				if (command == "аниме")
+					ctx.send(ctx.getMention() + " Говно твое аниме!!! coMMMMfy");
+				if (command == "буллинг" && !arg.empty())
+					ctx.send(arg + " Ты стал анимешником (соц. статуc = -9999999)");
+				if (command == "пистолетов")
+					ctx.send("Говно ваш Пистолетов coMMMMfy");
+			});	
 
-		if (msg.find("PRIVMSG") != std::string::npos)
-		{
-			ChatUser usr = getChatUserInfo(msg);
-			if (usr.message == "~аниме")
-				client.send("PRIVMSG #" + usr.channel + " :@" + usr.nickname + " Говно твое аниме!!! coMMMMfy");
-			if (usr.nickname == "chelovchik" && usr.message == "~stop_bot")
-				client.disconnect();
-		}
-	}
-
-	autoPong.join();
+	bot.run();	
 	
 	return 0;
 }

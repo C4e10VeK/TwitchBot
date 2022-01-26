@@ -10,5 +10,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -ggdb)
 
 find_package(Threads REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lib/yaml-cpp/")
+
+target_link_libraries(${PROJECT_NAME} PRIVATE yaml-cpp Threads::Threads)
 
