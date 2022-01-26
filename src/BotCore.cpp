@@ -2,8 +2,9 @@
 
 #include <iostream>
 #include <thread>
+#include <future>
 
-BotCore::BotCore() : m_client(), m_prefix("%") { }
+BotCore::BotCore() : m_client(), m_prefix("%"), onMessageCallback(m_callbackMsg) { }
 
 void BotCore::init(const std::string &path)
 {
@@ -26,11 +27,6 @@ void BotCore::init(const std::string &path)
 	}
 }
 
-void BotCore::setMessageCallback(MessageCallback callback)
-{
-	m_callbackMsg = callback;
-}
-
 void BotCore::joinChannel(const std::string &channel)
 {
 	std::clog << "Join to channel: " << channel << std::endl;
@@ -49,8 +45,8 @@ void BotCore::run()
 
 	while (m_client.isConnected())
 	{
-		std::string ircMessage = m_client.receive();
-		if (ircMessage.find("PRIVMSG") != std::string::npos && m_callbackMsg != nullptr)
+		std::string ircMessage = m_client.receive();	
+		if (ircMessage.find("PRIVMSG") != std::string::npos)
 		{
 			UserInfo user = UserInfo::getChatUserInfo(ircMessage);
 			MessageContext ctx(user, *this);
