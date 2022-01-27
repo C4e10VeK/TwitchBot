@@ -26,6 +26,9 @@ public:
 	
 	void joinChannel(const std::string &channel);
 
+	template<typename... T>
+	void connectCallback(T &&...some);
+
 	void sendMessageToChannel(const std::string &channel, const std::string &message) override;
 
 	void run();
@@ -38,4 +41,10 @@ public:
 private:
 	void autoPong();
 };
+
+template<typename... T>
+void BotCore::connectCallback(T &&...some)
+{
+	onMessageCallback = createCallback(std::forward<T>(some)...);
+}
 

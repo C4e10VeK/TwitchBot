@@ -11,7 +11,7 @@ class AbstractCallback
 public:
 	virtual ~AbstractCallback() = default;
 
-	virtual void call(Args... args) = 0;
+	virtual void call(Args &&...args) = 0;
 };
 
 template<typename F, typename... Args>
@@ -42,7 +42,7 @@ private:
 public:
 	FunctorCallback(F &functor) : m_functorHolder(functor) { }
 
-	void call(Args... args) override
+	void call(Args &&...args) override
 	{
 		m_functorHolder.m_functor(std::forward<Args>(args)...);
 	}
@@ -59,7 +59,7 @@ private:
 public:
 	MethodCallback(C &c, Method m) : m_class(c), m_method(m) {  }
 
-	void call(Args... args) override
+	void call(Args &&...args) override
 	{
 		(m_class.*m_method)(std::forward<Args>(args)...);
 	}
@@ -93,7 +93,7 @@ private:
 public:
 	using IType = ICallback<Args...>;
 
-	void call(Args... args)
+	void call(Args &&...args)
 	{
 		// std::unique_lock<std::mutex> lk(m_callMutex);
 
@@ -106,7 +106,7 @@ public:
 		m_callback = some;
 	}
 
-	void operator()(Args... args)
+	void operator()(Args &&...args)
 	{
 		call(std::forward<Args>(args)...);
 	}
