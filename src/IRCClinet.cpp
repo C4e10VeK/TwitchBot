@@ -1,6 +1,7 @@
 #include "IRCClinet.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 
 #include <sys/socket.h>
@@ -54,7 +55,7 @@ void IRCClient::send(const std::string &msg)
 {
 	if (!m_connected) return;
 
-	std::string message = msg + "\r\n";
+	std::string message = msg + "\r\n";	
 
 	int res = ::send(m_socket, message.c_str(), message.size(), 0);
 	if (res < 0)

@@ -3,6 +3,7 @@
 #include <random>
 #include <SQLiteCpp/SQLiteCpp.h>
 
+#include "Utils.hpp"
 #include "BotCore.hpp"
 
 class FeedCommand
@@ -24,6 +25,7 @@ public:
 			return;
 		}
 
+		std::stringstream messageStream;
 		char updateCmd[512] = {0};
 		SQLite::Statement query(m_db, "SELECT * FROM FEEDINFO WHERE User = ? AND Emoji = ?");
 		query.bind(1, ctx.getNickname());
@@ -44,7 +46,8 @@ public:
 		query.reset();
 		query.executeStep();
 
-		ctx.send(ctx.getMention() + ", Ты покормил: " + arg + " , " + query.getColumn(3).getString() + " раз(а). Размер - " + std::to_string(query.getColumn(4).getDouble()) + " см");
+		messageStream << ctx.getMention() << ", Ты покормил: "  << arg << " , " << query.getColumn(3) << " раз(а). Рахмер = " << query.getColumn(4) << " см";
+		ctx.send(messageStream.str());
 		m_cooldownTimer[ctx.getNickname()] = std::time(nullptr) + 1800;
 	}
 private:
@@ -71,16 +74,15 @@ private:
 
 int main()
 {
-	FeedCommand feed{};
-
 	BotCore bot;
+	FeedCommand feed{};
 	bot.init("config.yaml");
 
 	std::random_device rd;
 	std::mt19937 rng(rd());
 	std::uniform_int_distribution<int8_t> uni(0, 1);
 
-	bot.connectCallback([&](MessageContext &ctx){
+	bot.connectCallback<CallbackType::MESSAGE>([&](MessageContext &ctx){
 				std::clog << ctx.getNickname() << ": " <<  ctx.getMessage() << std::endl;
 
 				if (ctx.getMessage().compare(0, ctx.getPrefix().size(), ctx.getPrefix()) != 0)
@@ -108,7 +110,7 @@ int main()
 				if (command == "забанить" && !arg.empty())
 				{
 					bool res = uni(rng);
-					std::string msg = res == 0 ? " Нет" : " Да";
+					std::string msg = res ? " Нет" : " Да";
 					msg += ". Забанить " + arg;
 					ctx.send(ctx.getMention() + msg);
 					return;

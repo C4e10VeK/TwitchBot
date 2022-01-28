@@ -2,9 +2,8 @@
 
 #include <iostream>
 #include <thread>
-#include <future>
 
-BotCore::BotCore() : m_client(), m_prefix("%"), onMessageCallback(m_callbackMsg) { }
+BotCore::BotCore() : m_client(), m_prefix(), onMessageCallback(m_callbackMsg) { }
 
 void BotCore::init(const std::string &path)
 {
@@ -12,7 +11,8 @@ void BotCore::init(const std::string &path)
 	m_client.connect("irc.chat.twitch.tv", "6667");
 
 	std::string autho = "PASS " + config["token"].as<std::string>();
-	std::string nick = "NICK " + config["botname"].as<std::string>();	
+	std::string nick = "NICK " + config["botname"].as<std::string>();
+	m_prefix = config["cmdprefix"].as<std::string>();
 
 	m_client.send(autho);
 	m_client.send(nick);
@@ -30,13 +30,16 @@ void BotCore::init(const std::string &path)
 void BotCore::joinChannel(const std::string &channel)
 {
 	std::clog << "Join to channel: " << channel << std::endl;
-	m_client.send("JOIN #" + channel);
+	std::stringstream ircMessageSStream;
+	ircMessageSStream << "JOIN #" << channel;
+	m_client.send(ircMessageSStream.str());
 }
 
 void BotCore::sendMessageToChannel(const std::string &channel, const std::string &message)
-{
-	std::string ircMessage = "PRIVMSG #" + channel + " :" + message;
-	m_client.send(ircMessage);
+{	
+	std::stringstream ircMessageSStream;
+	ircMessageSStream << "PRIVMSG #" << channel << " :" << message;
+	m_client.send(ircMessageSStream.str());
 }
 
 void BotCore::run()
@@ -74,9 +77,10 @@ const std::string &BotCore::getPrefix() const
 
 void BotCore::autoPong()
 {
+	static std::string pongMsg = "PONG :tmi.twitch.tv";
 	while (m_client.isConnected())
 	{
-		m_client.send("PONG :tmi.twitch.tv");
+		m_client.send(pongMsg);
 		std::this_thread::sleep_for(std::chrono::milliseconds(240000));
 	}
 }
