@@ -46,7 +46,7 @@ public:
 		query.reset();
 		query.executeStep();
 
-		messageStream << ctx.getMention() << ", Ты покормил: "  << arg << " , " << query.getColumn(3) << " раз(а). Рахмер = " << query.getColumn(4) << " см";
+		messageStream << ctx.getMention() << ", Ты покормил: "  << arg << " , " << query.getColumn(3) << " раз(а). Размер = " << query.getColumn(4) << " см";
 		ctx.send(messageStream.str());
 		m_cooldownTimer[ctx.getNickname()] = std::time(nullptr) + 1800;
 	}
@@ -101,12 +101,7 @@ int main()
 				{
 					ctx.send(arg + " Ты стал анимешником (соц. статуc = -9999999)");
 					return;
-				}
-				if (command == "пистолетов")
-				{
-					ctx.send("Говно ваш Пистолетов coMMMMfy");
-					return;
-				}
+				}	
 				if (command == "забанить" && !arg.empty())
 				{
 					bool res = uni(rng);

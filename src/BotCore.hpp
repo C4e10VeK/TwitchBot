@@ -18,6 +18,7 @@ class BotCore : public IBotCore
 {
 private:
 	using MessageCallback = Callback<MessageContext &>;
+	using CommandCallback = Callback<MessageContext &, const std::string &>;
 
 	IRCClient m_client;
 	std::string m_prefix;

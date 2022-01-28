@@ -11,9 +11,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -ggdb)
 find_package(Threads REQUIRED)
 find_package(SQLite3)
 
-set(SQLITECPP_BUILD_EXAMPLES "" OFF)
-set(SQLITECPP_BUILD_TESTS "" OFF)
-
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lib/yaml-cpp/")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lib/sqlitecpp/")
 
