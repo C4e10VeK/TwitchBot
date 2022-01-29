@@ -49,7 +49,7 @@ private:
 	void autoPong();
 };
 
-template<CallbackType CT, typename... T>
+template<CallbackType CT = CallbackType::MESSAGE, typename... T>
 void BotCore::connectCallback(T &&...some)
 {
 	if constexpr (CT == CallbackType::MESSAGE)

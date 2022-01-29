@@ -92,7 +92,7 @@ std::string IRCClient::receive()
 {
 	if (!m_connected) return "";
 
-	std::string res(512, '\0');
+	std::string res(1024, '\0');
 	int err = recv(m_socket, res.data(), res.size(), 0);
 	if (err < 0)
 	{
