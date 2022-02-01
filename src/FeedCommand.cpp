@@ -81,6 +81,15 @@ void FeedCommand::sendStatus(MessageContext &ctx)
 		statusStream << query.getColumn(0) << " - " << query.getColumn(1) << " раз(a), размер = " << query.getColumn(2) << "; ";
 	}
 
+	if (!isTimerOut(ctx.getNickname()))
+	{
+		int seconds = m_cooldownTimer[ctx.getNickname()] - std::time(nullptr);
+		int minutes = seconds / 60;
+		char temp[32] = {0};
+		sprintf(temp, "%d:%02d", (minutes % 60), (seconds % 60));
+		statusStream << "До следующей кормежки осталось: " << temp;
+	}
+
 	ctx.send(statusStream.str());
 }
 
