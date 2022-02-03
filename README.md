@@ -1,4 +1,4 @@
-# Twitch bot written at in C++
+# Twitch bot written in C++
 ## TODO
 - [x] Add config parser
 - [x] Bot core
