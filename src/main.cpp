@@ -39,11 +39,13 @@ int main()
 				}	
 				if (command == "забанить" && !arg.empty())
 				{
-					int8_t res = uni(rng);
+					int8_t res = random(-6, 6);
 					std::string msg = res < 0 ? " Нет. Не банить" : " Да. Забанить";
 					ctx.send(ctx.getMention() + msg);
 					return;
 				}
+				if (command == "SHUTDOWN" && ctx.getNickname() == "chelovchik")
+					bot.stop();
 			});	
 
 	bot.run();

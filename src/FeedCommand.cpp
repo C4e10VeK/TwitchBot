@@ -1,4 +1,7 @@
 #include "FeedCommand.hpp"
+#include <algorithm>
+
+#include "Utils.hpp"
 
 FeedCommand::FeedCommand() : m_db("test.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) { }
 
@@ -11,7 +14,7 @@ void FeedCommand::execute(MessageContext &ctx, const std::string &arg)
 	}
 	if (arg.empty())
 	{
-		ctx.send(ctx.getMention() + ", можно кормить -> VeryPog VeryPag VeryLark AAUGH");
+		ctx.send(ctx.getMention() + ", можно кормить -> VeryPog VeryPag VeryLark AAUGH VeryPirate VeryBased");
 		return;
 	}
 	if (arg == "status")
@@ -35,7 +38,7 @@ void FeedCommand::execute(MessageContext &ctx, const std::string &arg)
 	}
 
 	std::stringstream messageStream;
-	char updateCmd[512] = {0};
+	std::stringstream updateSize;
 	SQLite::Statement query(m_db, "SELECT * FROM FEEDINFO WHERE User = ? AND Emoji = ?");
 	query.bind(1, ctx.getNickname());
 	query.bind(2, arg);
@@ -50,8 +53,9 @@ void FeedCommand::execute(MessageContext &ctx, const std::string &arg)
 		query.reset();
 	}
 
-	sprintf(updateCmd, "UPDATE FEEDINFO SET Count = Count + 1, Size = Size + 0.125 WHERE User = '%s' AND Emoji = '%s'", ctx.getNickname().c_str(), arg.c_str());
-	m_db.exec(updateCmd);
+	float randomSize = random(0.005f, 0.5f);
+	updateSize << "UPDATE FEEDINFO SET Count = Count + 1, Size = Size + " << randomSize << " WHERE User = '" << ctx.getNickname() << "' AND Emoji = '" << arg << "'" ;
+	m_db.exec(updateSize.str());
 	query.reset();
 	query.executeStep();
 

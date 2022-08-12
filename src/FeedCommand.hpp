@@ -11,7 +11,7 @@ class FeedCommand
 {
 private:
 	SQLite::Database m_db;
-	const std::vector<const char*> AVAIBLE_EMOJIES = { "VeryPag", "VeryPog", "VeryLark", "AAUGH" };
+	const std::vector<const char*> AVAIBLE_EMOJIES = { "VeryPag", "VeryPog", "VeryLark", "AAUGH", "VeryPirate", "VeryBased" };
 	std::unordered_map<std::string, std::time_t> m_cooldownTimer;
 public:
 	FeedCommand(); 

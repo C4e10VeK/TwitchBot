@@ -8,12 +8,6 @@
 #include "MessageContext.hpp"
 #include "Callback.hpp"
 
-enum class CallbackType
-{
-	MESSAGE,
-	COMMAND
-};
-
 class BotCore : public IBotCore
 {
 private:
@@ -33,7 +27,7 @@ public:
 	
 	void joinChannel(const std::string &channel);
 
-	template<CallbackType CT, typename... T>
+	template<typename... T>
 	void connectCallback(T &&...some);
 
 	void sendMessageToChannel(const std::string &channel, const std::string &message) override;
@@ -49,12 +43,9 @@ private:
 	void autoPong();
 };
 
-template<CallbackType CT = CallbackType::MESSAGE, typename... T>
+template<typename... T>
 void BotCore::connectCallback(T &&...some)
 {
-	if constexpr (CT == CallbackType::MESSAGE)
-		onMessageCallback = createCallback(std::forward<T>(some)...);
-	else
-		return;
+	onMessageCallback = createCallback(std::forward<T>(some)...);
 }
 
