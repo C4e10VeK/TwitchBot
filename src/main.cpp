@@ -13,10 +13,6 @@ int main()
 	FeedCommand feed{};
 	bot.init("config.yaml");
 
-	std::random_device rd;
-	std::mt19937 rng(rd());
-	std::uniform_int_distribution<int8_t> uni(-6, 6);
-
 	bot.connectCallback([&](MessageContext &ctx){
 				std::clog << ctx.getNickname() << ": " <<  ctx.getMessage() << std::endl;
 
@@ -25,7 +21,8 @@ int main()
 
 				std::string line = ctx.getMessage().substr(ctx.getPrefix().size());
 				std::string command = line.substr(0, line.find(" "));
-				std::string arg = command.size() + 1 <= line.size() ? line.substr(command.size() + 1) : "";	
+				std::string arg = command.size() + 1 <= line.size() ? line.substr(command.size() + 1) : "";
+				trim(arg);
 
 				if (command == "feed")
 				{	
