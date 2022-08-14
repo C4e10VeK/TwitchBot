@@ -1,7 +1,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <random>
-#include <SQLiteCpp/SQLiteCpp.h>
+#include <range/v3/view.hpp>
+#include <range/v3/range.hpp>
 
 #include "Utils.hpp"
 #include "BotCore.hpp"
@@ -15,6 +16,19 @@ int main()
 
 	bot.connectCallback([&](MessageContext &ctx){
 				std::clog << ctx.getNickname() << ": " <<  ctx.getMessage() << std::endl;
+
+				auto words = split(ctx.getMessage(), " ");
+
+				auto filtered = words | ranges::views::filter([](const std::string &s){ return s == "pirat"; }) | ranges::to_vector;
+
+				if (!filtered.empty())
+				{
+					std::stringstream piratReact;
+					for (const auto &s : filtered)
+						piratReact << s << " ";
+					
+					ctx.send(piratReact.str());
+				}
 
 				if (ctx.getMessage().compare(0, ctx.getPrefix().size(), ctx.getPrefix()) != 0)
 					return;

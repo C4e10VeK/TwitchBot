@@ -38,3 +38,20 @@ static inline void trim(std::string &s)
 	ltrim(s);
 	rtrim(s);
 }
+
+static inline std::vector<std::string> split(std::string s, const std::string &delimiter)
+{
+	std::vector<std::string> res;
+	size_t pos = 0;
+	std::string token;
+	while ((pos = s.find(delimiter)) != std::string::npos)
+	{
+		token = s.substr(0, pos);
+		res.emplace_back(token);
+		s.erase(0, pos + delimiter.length());
+	}
+        res.emplace_back(s);
+
+	return res;
+}
+

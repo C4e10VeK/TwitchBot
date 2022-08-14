@@ -1,5 +1,6 @@
 #include "FeedCommand.hpp"
 #include <algorithm>
+#include <sstream>
 
 #include "Utils.hpp"
 

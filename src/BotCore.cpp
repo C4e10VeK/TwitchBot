@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <thread>
+#include <sstream>
 
 BotCore::BotCore() : m_client(), m_prefix(), onMessageCallback(m_callbackMsg) { }
 
@@ -45,6 +46,7 @@ void BotCore::sendMessageToChannel(const std::string &channel, const std::string
 void BotCore::run()
 {
 	std::thread autoPongThread(&BotCore::autoPong, this);
+	autoPongThread.detach();
 
 	while (m_client.isConnected())
 	{
@@ -56,8 +58,6 @@ void BotCore::run()
 			m_callbackMsg(ctx);
 		}
 	}
-
-	autoPongThread.join();
 }
 
 void BotCore::stop()
