@@ -14,7 +14,7 @@ inline void onReactVeryLark(MessageContext &ctx)
 	auto words = ctx.getMessage() | 
 		ranges::views::split(' ') | 
 		ranges::views::transform([](auto &&rng){ return std::string(&*rng.begin(), ranges::distance(rng)); }) |
-		ranges::views::filter([](const std::string &s){ return s == "VeryLark"; }) |
+		ranges::views::filter([](const std::string &s){ return s == "pirat"; }) |
 		ranges::to_vector;
 
 	if (!words.empty())
