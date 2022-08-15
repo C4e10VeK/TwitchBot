@@ -5,9 +5,10 @@
 #include <unordered_map>
 #include <SQLiteCpp/SQLiteCpp.h>
 
-#include "MessageContext.hpp"
+#include "ICommand.hpp"
+#include "../MessageContext.hpp"
 
-class FeedCommand
+class FeedCommand : public ICommand
 {
 private:
 	SQLite::Database m_db;
@@ -16,10 +17,12 @@ private:
 public:
 	FeedCommand(); 
 
-	void execute(MessageContext &ctx, const std::string &arg);
+	void execute(MessageContext &ctx, const std::vector<std::string> &arg) override;
 
 private:
-	void sendStatus(MessageContext &ctx);	
+	void sendStatus(MessageContext &ctx);
+
+	void sendUserStatus(MessageContext &ctx, const std::string &nickname);
 
 	bool isValidEmoji(const std::string &emoji);
 
