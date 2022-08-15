@@ -16,7 +16,10 @@ void FeedCommand::execute(MessageContext &ctx, const std::vector<std::string> &a
 	if (args[0] == "status")
 	{
 		if (args.size() > 1)
+		{
 			sendUserStatus(ctx, args[1]);
+			return;
+		}
 
 		sendStatus(ctx);
 		return;
