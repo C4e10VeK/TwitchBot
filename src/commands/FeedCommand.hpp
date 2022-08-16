@@ -13,7 +13,6 @@ class FeedCommand : public ICommand
 private:
 	SQLite::Database m_db;
 	const std::vector<const char*> AVAIBLE_EMOJIES = { "VeryPag", "VeryPog", "VeryLark", "AAUGH", "VeryPirate", "VeryBased" };
-	std::unordered_map<std::string, std::time_t> m_cooldownTimer;
 public:
 	FeedCommand(); 
 
@@ -26,5 +25,5 @@ private:
 
 	bool isValidEmoji(const std::string &emoji);
 
-	bool isTimerOut(const std::string &user);
+	bool isTimerOut(const std::string &user, const std::string &emoji);
 };

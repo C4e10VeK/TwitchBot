@@ -1,6 +1,7 @@
 #include "FeedCommand.hpp"
 #include <algorithm>
 #include <sstream>
+#include <chrono>
 
 #include "../Utils.hpp"
 
@@ -27,14 +28,16 @@ void FeedCommand::execute(MessageContext &ctx, const std::vector<std::string> &a
 	
 	if (!isValidEmoji(args[0])) return;
 
-	if (!isTimerOut(ctx.getNickname()))
+	if (!isTimerOut(ctx.getNickname(), args[0]))
 	{
+		SQLite::Statement query(m_db, "SELECT Cooldown FROM FEEDINFO WHERE User = ? AND Emoji = ?");
+		query.bind(1, ctx.getNickname());
+		query.bind(2, args[0]);
+		query.executeStep();
+
 		std::stringstream timerMessage;
-		int seconds = m_cooldownTimer[ctx.getNickname()] - std::time(nullptr);
-		int minutes = seconds / 60;
-		char temp[32];
-		sprintf(temp, "%d:%02d", (minutes % 60), (seconds % 60));
-		timerMessage << ctx.getMention() << " Кормить можно раз в 10 минут coMMMMfy . Осталось: " << temp;
+		time_t time = query.getColumn(0).getInt64() - std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());	
+		timerMessage << ctx.getMention() << " Кормить можно раз в 10 минут coMMMMfy . Осталось: " << std::put_time(std::localtime(&time), "%M:%S");
 		ctx.send(timerMessage.str());
 		return;
 	}
@@ -56,14 +59,19 @@ void FeedCommand::execute(MessageContext &ctx, const std::vector<std::string> &a
 	}
 
 	float randomSize = random(0.005f, 0.5f);
-	updateSize << "UPDATE FEEDINFO SET Count = Count + 1, Size = Size + " << randomSize << " WHERE User = '" << ctx.getNickname() << "' AND Emoji = '" << args[0] << "'" ;
+	time_t cooldown = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	updateSize << "UPDATE FEEDINFO SET Count = Count + 1, Size = Size + " << randomSize 
+		<< ", Cooldown = " << cooldown + 600
+		<< " WHERE User = '" << ctx.getNickname() 
+		<< "' AND Emoji = '" << args[0] << "'" ;
+
 	m_db.exec(updateSize.str());
 	query.reset();
 	query.executeStep();
 
-	messageStream << ctx.getMention() << ", Ты покормил(a): "  << args[0] << " , " << query.getColumn(3) << " раз(а). Размер = " << query.getColumn(4) << " см";
+	messageStream << ctx.getMention() << ", Ты покормил(a): "  << args[0] << " , " << query.getColumn(3) << " раз(а). Размер = " << query.getColumn(4) << " см. " <<
+		"До следующий кормежки: 10:00";
 	ctx.send(messageStream.str());
-	m_cooldownTimer[ctx.getNickname()] = std::time(nullptr) + 600;
 }
 
 void FeedCommand::sendStatus(MessageContext &ctx)
@@ -85,15 +93,6 @@ void FeedCommand::sendStatus(MessageContext &ctx)
 	while (query.executeStep())
 	{
 		statusStream << query.getColumn(0) << " - " << query.getColumn(1) << " раз(a), размер = " << query.getColumn(2) << "; ";
-	}
-
-	if (!isTimerOut(ctx.getNickname()))
-	{
-		int seconds = m_cooldownTimer[ctx.getNickname()] - std::time(nullptr);
-		int minutes = seconds / 60;
-		char temp[32] = {0};
-		sprintf(temp, "%d:%02d", (minutes % 60), (seconds % 60));
-		statusStream << "До следующей кормежки осталось: " << temp;
 	}
 
 	ctx.send(statusStream.str());
@@ -120,15 +119,6 @@ void FeedCommand::sendUserStatus(MessageContext &ctx, const std::string &nicknam
 		statusStream << query.getColumn(0) << " - " << query.getColumn(1) << " раз(a), размер = " << query.getColumn(2) << "; ";
 	}
 
-	if (!isTimerOut(nickname))
-	{
-		int seconds = m_cooldownTimer[ctx.getNickname()] - std::time(nullptr);
-		int minutes = seconds / 60;
-		char temp[32] = {0};
-		sprintf(temp, "%d:%02d", (minutes % 60), (seconds % 60));
-		statusStream << "До следующей кормежки осталось: " << temp;
-	}
-
 	ctx.send(statusStream.str());
 
 }
@@ -139,16 +129,20 @@ bool FeedCommand::isValidEmoji(const std::string &emoji)
 	return res;
 }
 
-bool FeedCommand::isTimerOut(const std::string &user)
+bool FeedCommand::isTimerOut(const std::string &user, const std::string &emoji)
 {
-	if (m_cooldownTimer.find(user) != m_cooldownTimer.end())
-	{
-		std::time_t now = std::time(nullptr);
-		if (m_cooldownTimer[user] > now)
-		{
-			return false;
-		}
-	}
+	SQLite::Statement query(m_db, "SELECT Cooldown FROM FEEDINFO WHERE User = ? AND Emoji = ?");
+	query.bind(1, user);
+	query.bind(2, emoji);
+
+	query.executeStep();
+	if (!query.hasRow())
+		return true;
+
+	time_t cooldown = query.getColumn(0);
+
+	if (cooldown > std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()))
+		return false;
 
 	return true;
 }
